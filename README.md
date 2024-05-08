@@ -1,35 +1,35 @@
 # Paper Renamer GPT
 
-Paper Renamer is a script that automatically renames PDF files based on their content. Using OpenAI's GPT-4, the script extracts the first author's surname, the year of publication, and relevant key phrases to generate a meaningful filename. The advantage of this approach is that it can handle arbitrarily formatted pdfs. 
+Paper Renamer is a script that automatically renames PDF files based on their content. Using OpenAI's GPT-4, the script extracts the first author's surname, the year of publication, and title to generate a meaningful filename. The advantage of this approach is that it can handle arbitrarily formatted pdfs. 
 
 ### Examples
-[Ramkumar_2023_Mascara1b_CRIRES.pdf](https://arxiv.org/pdf/2308.07157.pdf)
+[[Zhao 2023] LLaMA_Beyond_English_An_Empirical_Study_on_Language_Capability_Transfer.pdf](https://arxiv.org/abs/2401.01055)
 
-[Leigh_2021_uniForest_MicrobiomeStudies.pdf](https://www.biorxiv.org/content/10.1101/2021.05.17.444491v1.full.pdf)
+[[Hong 2022] CogAgent_A_Visual_Language_Model_for_GUI_Agents.pdf](https://arxiv.org/abs/2312.08914)
 
-[Melo-Vega-Angeles_2023_COVID-19_CopperFuturesVolatility.pdf](https://www.mdpi.com/2227-7099/11/7/200)
+[[Gromov 2022] The_Unreasonable_Ineffectiveness_of_the_Deeper_Layers.pdf](https://arxiv.org/abs/2403.17887)
 ## Installation
 Download repo:
 ```
-git clone https://github.com/ksmith9/paper_renamer_gpt/
+git clone https://github.com/wandgibaut/paper_renamer_gpt/
 ```
 Install relevant python modules:
 ```
-pip install openai PyPDF2
+pip install -r requirements.txt
 ```
 ## Usage
-Create a file: apikey.txt with your openai api key.
+set OPENAI_API_KEY with your openai api key in the environment variables.
 
-Navigate to the directory containing the script and run:
+Pass the directory containing the script as argument and run:
 
 ```
-python pdf_renamer.py
+python paper_renamer.py --dir /path/to/pdfs
 ```
 
 The script will process PDFs in the current directory and rename them. It will also create and update a json file with papers already processed to ensure the same info isn't sent multiple times. 
 
-## Note
-I've tested this on a few papers from fields that aren't my own, but I lack the relevant domain knowledge to tell you whether they're any good. Hopefully it's enough to know what paper you're looking at, assuming you've read them already. If not, I'd reccomend tweaking the prompt in the function get_filename_from_openai.
+## Note on the fork
+I've changed the original prompt to better suit my naming patterns. Also I've mande changes to pass the dir as an argument instead of hardcoding it.
 
 ### License
 

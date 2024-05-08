@@ -1,16 +1,11 @@
 import PyPDF2
-import openai
 import os
 import json
+from openai import OpenAI
+import argparse
 
-paper_directory = './'
-
-# Set up OpenAI API key
-def get_api_key_from_file(filename='apikey.txt'):
-    with open(filename, 'r') as file:
-        return file.readline().strip()
-
-openai.api_key = get_api_key_from_file()
+# please set you api key in your environment variables
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # File to keep track of perviously renamed pdfs
 RENAMED_PDFS_FILE = "renamed_pdfs.json"
@@ -34,7 +29,7 @@ def get_filename_from_openai(text):
     messages = [
         {
             "role": "system",
-            "content": "You are an assistant that suggests PDF filenames based on content. Suggest a filename in the format where you identify the first author's surname, the year of publication, and one or two relevant key phrases. The format should be: \n surname_year_keyphrase1_keyphrase2.pdf \n Include no extraneous text. 'pdf' shouldn't be used anywhere except in the file extension. Responses should only be in the forms like: \n Ramkumar_2023_Mascara1b_CRIRES.pdf \n Troutman_2011_βPICTORIS_rovibrational.pdf \n If there is an issue finding any of the info mentioned, with no additional text simply return: \nERROR\n"
+            "content": "You are an assistant that suggests PDF filenames based on content. Suggest a filename in the format where you identify the first author's surname, the year of publication, and the title of publication. The format should be: \n '[surname year] title_of_publication.pdf' \n Include no extraneous text. 'pdf' shouldn't be used anywhere except in the file extension. Responses should only be in the forms like: \n [Ramkumar 2023] Mascara1b_CRIRES.pdf \n [Troutman 2011] βPICTORIS_rovibrational.pdf \n If there is an issue finding any of the info mentioned, with no additional text simply return: \nERROR\n"
         },
         {
             "role": "user",
@@ -42,12 +37,13 @@ def get_filename_from_openai(text):
         }
     ]
 
-    response = openai.ChatCompletion.create(
+    client = OpenAI()
+    response = client.chat.completions.create(
         model="gpt-4", 
         messages=messages
     )
 
-    new_filename_raw = response['choices'][0]['message']['content'].strip()
+    new_filename_raw = response.choices[0].message.content.strip()
     return new_filename_raw
 
 # Creates file tracking json if one doesn't exist, otherwise loads it
@@ -64,7 +60,7 @@ def save_renamed_pdfs(renamed_list):
     with open(RENAMED_PDFS_FILE, 'w') as f:
         json.dump(renamed_list, f)
 
-def main():
+def main(paper_directory : str ='./data'):
     directory = paper_directory
     
     renamed_pdfs = load_renamed_pdfs()
@@ -91,5 +87,26 @@ def main():
                 save_renamed_pdfs(renamed_pdfs)  # Save the renamed files list after every rename
 
 if __name__ == "__main__":
-    main()
+    
+    parser = argparse.ArgumentParser(
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter, add_help=False)
+    parser.add_argument('-d',
+                        '--dir',
+                        type=str,
+                        default='./data',
+                        help='Directory where the PDFs are stored')
+    parser.add_argument('-h',
+                        '--help',
+                        default=argparse.SUPPRESS,
+                        action='help',
+                        help='usage: python paper_renamer.py -d <directory> or python paper_renamer.py --dir <directory>')
 
+    
+    args = parser.parse_args()
+
+    if args.__contains__('help'):
+        parser.print_help()
+        exit()
+
+
+    main(args.dir)
